@@ -1,11 +1,12 @@
 import os
-from time import time, sleep
+from time import time
 import hero
 import game_state
 import config
 
 import coins, bullets, obstacles
 from magnet import Magnet
+from villain import Villain
 
 
 def start_game(screen):
@@ -20,34 +21,42 @@ def start_game(screen):
     Obs = obstacles.Obstacles()
     Bullets = bullets.Bullet()
     Mag=Magnet()
+    ice=bullets.Bullet()
 
     screen.create_board( height, width, Coin, Obs, Mag )
-
-    #print(Mag.get_y(),Mag.get_start(),Mag.get_end())
-
 
     player = hero.Hero( 4, 40 )  # creating hero with co ordinates
 
     config.time_left = 500
     config.start_time = time()
 
-    screen.refresh_screen( player )
+    screen.refresh_screen( player,Bullets )
 
+    dragon_flag=0
+    Dragon=Villain(config.width-49,player.get_y())
+
+
+    itr=1
     while ((not game_state.is_game_over()) and (config.time_left > 0)):
         player.gravity()
         player.magnet_effect(Mag.get_y(),Mag.get_start(),Mag.get_end()) #to put the effect of the magnet on the hero
 
-        player.movehero( screen.screen, Bullets)
+        player.movehero( screen.get_screen(), Bullets)
 
-        game_state.coin_check( screen.screen )
+        game_state.coin_check( screen.get_screen() )
 
-        game_state.place_bullets( screen.screen, Bullets, Obs )
+        game_state.place_bullets( screen.get_screen(), Bullets, Obs ,dragon_flag)
 
-        #config.time_left = config.time_left-(time()-config.start_time)
-        screen.refresh_screen( player )
+        config.time_left = 500-(time()-config.start_time)
+        screen.refresh_screen( player ,Bullets)
 
-        if config.start_col <= 4 * int( width ):  # for moving the board frame
+        if config.start_col < 4 * int( width ):  # for moving the board frame
             config.start_col += 1 + config.boost_speed
+        else:
+            #this takes place when in the last frame
+            dragon_flag=1
+            Dragon.update(player.get_y(),ice,screen.get_screen())
+            game_state.place_ice(screen.get_screen(),ice,player)
 
         if config.boost_end_time <= time():
             if config.state == 'u':
@@ -62,6 +71,9 @@ def start_game(screen):
                 config.boost_end_time=time()+10
                 config.state='r'
 
+        itr+=1
+        if itr%3==0 and player.get_y()<config.height-3:
+            config.hangtime+=1
 
     if config.result == 1:
         print( "YOU WON !!!!!!!!! :)" )

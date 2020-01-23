@@ -7,6 +7,7 @@ score=0
 time_left=0
 lives=3
 state='r'
+hangtime=2
 
 hero=[" O   ","<\===","/ \  "]
 
@@ -34,3 +35,5 @@ width=-1
 frame_width=-1
 
 result=0 #for checking if game is won or lost
+
+villain_life=4

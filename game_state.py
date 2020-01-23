@@ -5,13 +5,14 @@ from time import time
 import numpy as np
 import config
 
-
 def is_game_over():  # run time check first then run collision detection
     var = False
     if config.lives == 0:
         var = True
+    if config.villain_life==0:
+        var=True
+        config.result=1
     return var
-
 
 def generate_obstacle(start, end, screen, obs):
     seed( time() )
@@ -151,42 +152,83 @@ def remove_obstacle(y_ob, x_ob, screen, obs):
         return None
 
 
-def place_bullets(screen, bullet, obs):
-    temp = bullet.get_cor()
-    temp = temp[temp[:, 1] > config.start_col]  # removes bullets behind the frame if any for some reason
-    # clean out bullets outside of frame
+def place_bullets(screen, bullet, obs,flag):
+    if not flag: #flag is true means its the last frame boss fight so collision handling becomes easier
+        temp = bullet.get_cor()
+        temp = temp[temp[:, 1] > config.start_col]  # removes bullets behind the frame if any for some reason
+        # clean out bullets outside of frame
 
-    # space out all the bullets
-    for co in temp:
-        x = co[1]
-        y = co[0]
-        screen[y][x] = ' '
+        # space out all the bullets
+        for co in temp:
+            x = co[1]
+            y = co[0]
+            screen[y][x] = ' '
 
-    temp = temp[temp[:, 1] < config.start_col + config.frame_width - 1]  # removes bullets outside of the frame
-    # check for obstacles that might get rekted and remove accordingly
-    # any obstacles within the 4 forward of current location if removed
-    for row_no, co in enumerate( temp ):
-        x_curr = co[1]
-        y_curr = co[0]
-        if x_curr + 4 > config.width:
-            np.delete( temp, row_no, 0 )
-            continue
-        for i in range( 5 ):
-            if screen[y_curr][x_curr + i] == 'O':
-                remove_obstacle( y_curr, x_curr + i, screen, obs )
+        temp = temp[temp[:, 1] < config.start_col + config.frame_width - 1]  # removes bullets outside of the frame
+        # check for obstacles that might get rekted and remove accordingly
+        # any obstacles within the 4 forward of current location if removed
+        for row_no, co in enumerate( temp ):
+            x_curr = co[1]
+            y_curr = co[0]
+            if x_curr + 4 >= config.width:
                 np.delete( temp, row_no, 0 )
+                continue
+            for i in range( 5 ):
+                if screen[y_curr][x_curr + i] == 'O':
+                    remove_obstacle( y_curr, x_curr + i, screen, obs )
+                    np.delete( temp, row_no, 0 )
 
-    # update the bullet positions i.e curr_x+4
-    temp[:, 1] += 4
+        # update the bullet positions i.e curr_x+4
+        temp[:, 1] += 4
 
-    # place all the bullets
-    for co in temp:
-        x = co[1]
-        y = co[0]
-        screen[y][x] = '>'
+        temp = temp[temp[:, 1] < config.start_col + config.frame_width - 1]  # removes bullets outside of the frame
 
-    bullet.update_cor( temp )
+        # place all the bullets
+        for co in temp:
+            x = co[1]
+            y = co[0]
+            screen[y][x] = '>'
 
+        bullet.update_cor( temp )
+
+    else: #its the boss fight frame
+        temp = bullet.get_cor()
+        temp = temp[temp[:, 1] > config.start_col]  # removes bullets behind the frame if any for some reason
+        # clean out bullets outside of frame
+
+        # space out all the bullets
+        for co in temp:
+            x = co[1]
+            y = co[0]
+            screen[y][x] = ' '
+
+        temp = temp[temp[:, 1] < config.start_col + config.frame_width - 1]  # removes bullets outside of the frame
+        # check for obstacles that might get rekted and remove accordingly
+        # any obstacles within the 4 forward of current location if removed
+        for row_no, co in enumerate( temp ):
+            x_curr = co[1]
+            y_curr = co[0]
+            if x_curr + 4 >= config.width:
+                np.delete( temp, row_no, 0 )
+                continue
+            for i in range( 5 ):
+
+                if screen[y_curr][x_curr + i] != ' ': #cos the dragon has all kinds of ascii to keep track of
+                    config.villain_life-=1 #reduce villain life
+                    np.delete( temp, row_no, 0 )
+
+        # update the bullet positions i.e curr_x+4
+        temp[:, 1] += 4
+
+        temp = temp[temp[:, 1] < config.start_col + config.frame_width - 1]  # removes bullets outside of the frame
+
+        # place all the bullets
+        for co in temp:
+            x = co[1]
+            y = co[0]
+            screen[y][x] = '>'
+
+        bullet.update_cor( temp )
 
 def generate_magnet(start, end,screen, Mag):
     seed( time() )
@@ -208,9 +250,44 @@ def generate_magnet(start, end,screen, Mag):
     Mag.init(x_cor,y_cor)
 
     return None
-#     _________
-#    | _______ |
-#    | |     | |
-#    | |     | |
-#
-#  the above is what the magnet that is generated will look like
+
+def place_ice(screen,ice,player):
+    temp = ice.get_cor()
+
+    # space out all the bullets
+    for co in temp:
+        x = co[1]
+        y = co[0]
+        screen[y][x] = ' '
+
+    temp = temp[temp[:, 1] > config.start_col]  # removes bullets behind the frame if any for some reason
+    # clean out bullets outside of frame
+
+    # any obstacles within the 4 forward of current location if removed
+    for row_no, co in enumerate( temp ):
+        x_curr = co[1]
+        y_curr = co[0]
+        for i in range( 5 ):
+            if screen[y_curr][x_curr - i] == 'O' or screen[y_curr][x_curr - i] == '=' or screen[y_curr][x_curr - i] == '\\':
+                config.lives -= 1  # reduce hero life
+                np.delete( temp, row_no, 0 )
+                player.restart_life()
+    # update the bullet positions i.e curr_x+4
+    temp[:, 1] -= 4
+
+    temp = temp[temp[:, 1] > config.start_col]  # removes bullets behind the frame if any
+
+    # place all the bullets
+    for co in temp:
+        x = co[1]
+        y = co[0]
+        screen[y][x] = '+'
+
+    ice.update_cor( temp )
+
+
+def remove_bullet(bullets, y, x): #to remove that one bullet show by the hero that hit the dragon
+    temp=bullets.get_cor()
+    temp = temp[(temp[:, 1] != x) *(temp[:,0]!=y)]  # removes bullets behind the frame if any for some reason
+    bullets.update_cor( temp )
+    return None

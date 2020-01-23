@@ -1,4 +1,3 @@
-import config
 
 class Person():
     def __init__(self,x,y):
@@ -17,7 +16,4 @@ class Person():
     def update_y(self,new_y):
         self._y=new_y
 
-
-class Villain(Person):
-    pass
 

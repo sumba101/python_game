@@ -23,44 +23,50 @@ class Hero(Person):
         Person.__init__( self, x, y )
         self._boost= False
         self._shield=False
-        self.change()
+        self._gravity=3
+        self._change()
 
-    def change(self):
+    def _change(self):
         config.hero_x=self.get_x()
         config.hero_y=self.get_y()
 
     def gravity(self):
-        if self.get_y()<config.height-4:
-            self.update_y(self.get_y()+2)
-            self.change()
-        elif self.get_y()==config.height-4:
-            self.update_y(self.get_y()+1)
-            self.change()
+
+        self._gravity=int(0.5 * ((config.hangtime ** 2)))
+
+        if self.get_y()<config.height-3-self._gravity:
+            self.update_y(self.get_y()+self._gravity)
+            self._change()
+
+        else:
+            self.update_y(config.height-3)
+            self._change()
+            config.hangtime=0
 
     def acceleration(self):
         if self.get_y()>=3:
             self.update_y(self.get_y()-3-config.boost_speed)
 
 
-    def left(self):
+    def _left(self):
         self.update_x(config.hero_x) #because of changes produced by screen movement
         if self.get_x()-3-config.boost_speed <= config.start_col:
             pass
         else:
             self.update_x(self.get_x()-3-config.boost_speed)
-            self.change()
+            self._change()
 
-    def right(self):
+    def _right(self):
         self.update_x(config.hero_x) #because of changes produced by screen movement
         if self.get_x() + 3+config.boost_speed >= config.start_col+config.frame_width:
             pass
         else:
             self.update_x( self.get_x() + 3 +config.boost_speed)
-            self.change()
+            self._change()
 
-    def up(self):
+    def _up(self):
         self.acceleration()
-        self.change()
+        self._change()
 
     def shield(self):
         if config.state!='r':
@@ -98,13 +104,14 @@ class Hero(Person):
 
         char = user_input()
         if char == LEFT:
-            self.left()
+            self._left()
 
         elif char==RIGHT:
-            self.right()
+            self._right()
 
         elif char==UP:
-            self.up()
+            self._up()
+            config.hangtime=0
 
         elif char==SHIELD:
             self.shield()
@@ -121,13 +128,13 @@ class Hero(Person):
         if config.start_col+config.frame_width-5<self.get_y():
             self.update_y(config.start_col+config.frame_width-5)
 
-        self.change()
+        self._change()
 
     def restart_life(self):
         #Resets the hero co ordinates to the initial one
         self.update_y(config.height-5)
         self.update_x(config.start_col)
-        self.change()
+        self._change()
 
     def bullets(self,screen,bullet):
         #bullets come from y+1,x+6
@@ -139,11 +146,10 @@ class Hero(Person):
 
     def magnet_effect(self, param, param1, param2):
         if param1<=self.get_x() and param2>=self.get_x() and param+4<=self.get_y():
-            self.up()
+            self._up()
             if param1<=self.get_x() and param2-40>=self.get_x():
-                self.right()
-            # else:
-            #     self.left()
+                self._right()
+
         else:
             pass
 

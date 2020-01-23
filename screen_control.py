@@ -2,12 +2,13 @@ import game_state
 import config
 import os
 import numpy as np
-from colorama import Back, Fore, Style
+from colorama import Back, Fore, Style, init
 
+init()
 
 class scrn():
     def __init__(self):
-        self.start_screen = [".        .          .    .    .            .            .                   .",
+        self._start_screen = [".        .          .    .    .            .            .                   .",
                              ".               ..       .       .   .             .",
                              " .      .     T h i s   i s   t h e   g a l a x y   o f   . . .             .",
                              "                     .              .       .                    .      .",
@@ -46,7 +47,7 @@ class scrn():
         for x in self._instructions:
             print( x )
 
-        for y in self.start_screen:
+        for y in self._start_screen:
             print( buff, y, buff )
 
     def create_board(self, height, width,Coin,Obs,Mag):
@@ -54,16 +55,16 @@ class scrn():
         self._frame_width = int( width )
         self._width = int( width ) * 5
 
-        self.ground = np.full( (3, self._frame_width), 'T' )
-        self.screen = np.full( (self._height, self._width), ' ' )
+        self._ground = np.full( (3, self._frame_width), 'T' )
+        self._screen = np.full( (self._height, self._width), ' ' )
 
         # generate coins
-        game_state.generate_coins( int( width ), 2 * int( width ), self.screen ,Coin)
-        game_state.generate_coins( 3 * int( width ), 4 * int( width ), self.screen ,Coin)
-        game_state.generate_magnet(2*int(width),3*int(width),self.screen,Mag)
+        game_state.generate_coins( int( width ), 2 * int( width ), self._screen ,Coin)
+        game_state.generate_coins( 3 * int( width ), 4 * int( width ), self._screen ,Coin)
+        game_state.generate_magnet(2*int(width),3*int(width),self._screen,Mag)
 
         # generate obstacles
-        game_state.generate_obstacle( 2 * int( width ), 4 * int( width ), self.screen ,Obs)
+        game_state.generate_obstacle( 2 * int( width ), 4 * int( width ), self._screen ,Obs)
 
     def print_on_blue(self, x, y):
         if y == 'black':
@@ -84,7 +85,7 @@ class scrn():
     def print_on_green(self, x):
         print( Fore.BLACK + Back.GREEN + x + Style.RESET_ALL, end='', sep='')
 
-    def refresh_screen(self,player):
+    def refresh_screen(self,player,bullets):
         print( "\033[0;0H" )
         print(Back.WHITE + Fore.BLACK + "SCORE :- %d                    TIME REMAINING:- %d                    LIVES:- %d   %s" % (config.score, config.time_left, config.lives, config.state) + Style.RESET_ALL )
 
@@ -94,11 +95,13 @@ class scrn():
             while (x - config.start_col) < self._frame_width:
 
                 if y >= config.hero_y and y <= config.hero_y + 2 and x >= config.hero_x and x <= config.hero_x + 4:
-                    if self.screen[y][x]=='O' and config.shield==False: #COLLISION WITH OBSTACLE
+                    if (self._screen[y][x]=='O' and config.shield==False) or (self._screen[y][x]=='+'): #COLLISION WITH OBSTACLE OR WITH DRAGONS ICE BALLS(+)
                         config.lives-=1
                         player.restart_life()
+                        if self._screen[y][x]=='+':
+                            self._screen[y][x] = ' '
                         os.system('clear')
-                        self.refresh_screen(player) #refresh screen with player in the restart position
+                        self.refresh_screen(player,bullets) #refresh screen with player in the restart position
                         return None
 
                     elif config.shield==True:
@@ -107,24 +110,40 @@ class scrn():
                     else:
                         self.print_on_blue( config.hero[y - config.hero_y][x - config.hero_x], y='white' )
 
-                elif self.screen[y][x] == '>':
-                    self.print_on_blue( self.screen[y][x], y='white' )
+                elif y >= config.villain_y and y <= config.villain_y + 12 and x >= config.villain_x and x <= config.villain_x + 39:
+                    if self._screen[y][x]=='>': #Collision with a bullet from the hero
+                        config.villain_life-=1
+                        self._screen[y][x]=' ' #remove this bullet
+                        game_state.remove_bullet(bullets,y,x)
+                        os.system('clear')
+                        self.refresh_screen(player,bullets)
+                        return None
+                    else:
+                        self.print_on_blue(config.villain[y-config.villain_y][x-config.villain_x],y='red')
 
-                elif self.screen[y][x] == 'C':  # its a coin
-                    self.print_on_blue( self.screen[y][x], y='yellow' )
 
-                elif self.screen[y][x] == 'O':
-                    self.print_on_blue( self.screen[y][x], y='red' )
+                elif self._screen[y][x] == '>':
+                    self.print_on_blue( self._screen[y][x], y='white' )
+
+                elif self._screen[y][x] == 'C':  # its a coin
+                    self.print_on_blue( self._screen[y][x], y='yellow' )
+
+                elif self._screen[y][x] == 'O':
+                    self.print_on_blue( self._screen[y][x], y='red' )
+
 
                 else:
-                    self.print_on_blue( self.screen[y][x], y='black' )
+                    self.print_on_blue( self._screen[y][x], y='black' )
 
                 x += 1
 
-        for row in self.ground:
+        for row in self._ground:
             for ele in row:
                 self.print_on_green( ele )
 
         # there shall be an if condition to stop screen movement when dragon has fully entered the screen
         # if condition shall check if the x_co ordinate has entered the screen space and stops if so
         # game_state.move_xcor()
+
+    def get_screen(self):
+        return self._screen
