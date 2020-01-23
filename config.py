@@ -7,7 +7,7 @@ score=0
 time_left=0
 lives=3
 state='r'
-hangtime=2
+hangtime=1
 
 hero=[" O   ","<\===","/ \  "]
 

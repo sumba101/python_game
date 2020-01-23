@@ -6,8 +6,10 @@ os.system( 'clear' )
 screen = screen_control.scrn()
 
 getch=input()
+
 while(getch != 'Q' and getch != 'q' and getch != 's' and getch != 'S'):
     getch=input("Try again meat head")
+    print("")
 
 if getch == 's':
         render_game.start_game(screen)

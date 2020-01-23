@@ -37,7 +37,7 @@ class scrn():
                               "              2) Use SPACE to shoot ",
                               "              3) Use Q to use shield when you have power-up",
                               "              4) Use E to use boost when you have power-up ",
-                              "                          ", "                          ", "                          "
+                              "              5) Use P to quit the game at any time           ", "                          ", "                          "
                               ]
 
         self._initial()
@@ -61,6 +61,7 @@ class scrn():
         # generate coins
         game_state.generate_coins( int( width ), 2 * int( width ), self._screen ,Coin)
         game_state.generate_coins( 3 * int( width ), 4 * int( width ), self._screen ,Coin)
+        #generate magnet
         game_state.generate_magnet(2*int(width),3*int(width),self._screen,Mag)
 
         # generate obstacles
@@ -140,10 +141,6 @@ class scrn():
         for row in self._ground:
             for ele in row:
                 self.print_on_green( ele )
-
-        # there shall be an if condition to stop screen movement when dragon has fully entered the screen
-        # if condition shall check if the x_co ordinate has entered the screen space and stops if so
-        # game_state.move_xcor()
 
     def get_screen(self):
         return self._screen

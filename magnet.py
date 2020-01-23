@@ -1,5 +1,4 @@
 class Magnet():
-
     def init(self,x,y):
         self._startx=x-40
         self._endx=x+40

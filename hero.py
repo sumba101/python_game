@@ -16,7 +16,7 @@ RIGHT = 'd'
 UP = 'w'
 SHIELD = 'q'
 BOOST = 'e'
-
+QUIT='p'
 
 class Hero(Person):
     def __init__(self, x, y):
@@ -46,7 +46,6 @@ class Hero(Person):
     def acceleration(self):
         if self.get_y()>=3:
             self.update_y(self.get_y()-3-config.boost_speed)
-
 
     def _left(self):
         self.update_x(config.hero_x) #because of changes produced by screen movement
@@ -122,6 +121,9 @@ class Hero(Person):
         elif char==SHOOT:
             self.bullets(screen,bullet)
 
+        elif char == QUIT:  # if its quit input
+            return True
+
         if config.start_col>self.get_x():
             self.update_x(config.start_col)
 
@@ -129,6 +131,8 @@ class Hero(Person):
             self.update_y(config.start_col+config.frame_width-5)
 
         self._change()
+
+        return False
 
     def restart_life(self):
         #Resets the hero co ordinates to the initial one

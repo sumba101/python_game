@@ -28,8 +28,10 @@ class Villain(Person):
             pass
 
     def update(self,y,ice,screen):
-        if y+13<config.height and y!=0: #check if the height is within the height boundary of the dragon
+        if y+13<config.height: #check if the height is within the height boundary of the dragon
             self.update_y(y)
+        else:
+            self.update_y(config.height-14)
         self._change()
         self.shoot_ice(screen,ice)
 

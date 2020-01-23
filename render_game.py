@@ -37,11 +37,13 @@ def start_game(screen):
 
 
     itr=1
-    while ((not game_state.is_game_over()) and (config.time_left > 0)):
+    quitter=False
+
+    while ((not game_state.is_game_over()) and (config.time_left > 0) and (not quitter)):
         player.gravity()
         player.magnet_effect(Mag.get_y(),Mag.get_start(),Mag.get_end()) #to put the effect of the magnet on the hero
 
-        player.movehero( screen.get_screen(), Bullets)
+        quitter=player.movehero( screen.get_screen(), Bullets)
 
         game_state.coin_check( screen.get_screen() )
 
@@ -58,7 +60,7 @@ def start_game(screen):
             Dragon.update(player.get_y(),ice,screen.get_screen())
             game_state.place_ice(screen.get_screen(),ice,player)
 
-        if config.boost_end_time <= time():
+        if config.boost_end_time <= time(): #to handle power ups
             if config.state == 'u':
                 if config.boost_speed!=0:
                     config.boost_speed = 0
@@ -72,12 +74,12 @@ def start_game(screen):
                 config.state='r'
 
         itr+=1
-        if itr%3==0 and player.get_y()<config.height-3:
+        if player.get_y()<config.height-3:
             config.hangtime+=1
 
     if config.result == 1:
-        print( "YOU WON !!!!!!!!! :)" )
+        print( "\nYOU WON !!!!!!!!! :)" )
     else:
         print( "YOU LOST :( :( :(" )
 
-    print( "SCORE- %d" % (config.score) )
+    print( "SCORE:- %d" % (config.score) )
