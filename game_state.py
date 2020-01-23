@@ -74,7 +74,6 @@ def generate_obstacle(start, end, screen, obs):
 
             obs.update_dcor( temp )
 
-
 def generate_coins(start, end, screen, coin):
     seed( time() )
 
@@ -149,7 +148,6 @@ def remove_obstacle(y_ob, x_ob, screen, obs):
         temp = temp[temp[:, 2] != ob_no]
         obs.update_dcor( temp )
         return None
-
 
 def place_bullets(screen, bullet, obs,flag):
     if not flag: #flag is true means its the last frame boss fight so collision handling becomes easier
@@ -284,13 +282,19 @@ def place_ice(screen,ice,player):
 
     ice.update_cor( temp )
 
-
 def remove_bullet(bullets, y, x): #to remove that one bullet show by the hero that hit the dragon
     temp=bullets.get_cor()
-    temp = temp[(temp[:, 1] != x) *(temp[:,0]!=y)]  # removes bullets behind the frame if any for some reason
-    bullets.update_cor( temp )
-    return None
+    temp2=np.zeros((1,2),dtype=int) #this would be removed when placing bullets so no worries
+    for row in temp:
+        y_cur=row[0]
+        x_cur=row[1]
+        if y_cur==y and x==x_cur:
+            continue
+        else:
+          temp2 = np.insert( temp2, len( temp2 ), [y_cur, x_cur], axis=0 )
 
+    bullets.update_cor( temp2 )
+    return None
 
 def generate_clouds(start, end, screen):
     seed( time() )
@@ -303,4 +307,3 @@ def generate_clouds(start, end, screen):
         for (i,row) in enumerate(config.cloud):
             for (j,ele) in enumerate(row):
                 screen[y_cor+i][x_cor+j]=ele
-                
