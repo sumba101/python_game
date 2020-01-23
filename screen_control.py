@@ -58,14 +58,17 @@ class scrn():
         self._ground = np.full( (3, self._frame_width), 'T' )
         self._screen = np.full( (self._height, self._width), ' ' )
 
+        #generate clouds
+        game_state.generate_clouds(1,2*int(width),self.get_screen())
+
         # generate coins
-        game_state.generate_coins( int( width ), 2 * int( width ), self._screen ,Coin)
-        game_state.generate_coins( 3 * int( width ), 4 * int( width ), self._screen ,Coin)
+        game_state.generate_coins( int( width ), 2 * int( width ), self.get_screen() ,Coin)
+        game_state.generate_coins( 3 * int( width ), 4 * int( width ), self.get_screen() ,Coin)
         #generate magnet
-        game_state.generate_magnet(2*int(width),3*int(width),self._screen,Mag)
+        game_state.generate_magnet(2*int(width),3*int(width),self.get_screen(),Mag)
 
         # generate obstacles
-        game_state.generate_obstacle( 2 * int( width ), 4 * int( width ), self._screen ,Obs)
+        game_state.generate_obstacle( 2 * int( width ), 4 * int( width ), self.get_screen() ,Obs)
 
     def print_on_blue(self, x, y):
         if y == 'black':

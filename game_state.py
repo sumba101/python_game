@@ -106,7 +106,6 @@ def coin_check(sc):
 
     return None
 
-
 def remove_obstacle(y_ob, x_ob, screen, obs):
     temp = obs.get_vcor()
     candidate = list( filter( lambda row: row[0] == y_ob and row[1] == x_ob, temp ) )
@@ -291,3 +290,17 @@ def remove_bullet(bullets, y, x): #to remove that one bullet show by the hero th
     temp = temp[(temp[:, 1] != x) *(temp[:,0]!=y)]  # removes bullets behind the frame if any for some reason
     bullets.update_cor( temp )
     return None
+
+
+def generate_clouds(start, end, screen):
+    seed( time() )
+    count = randint( 5, 6 )
+    for _ in range(count):
+        seed( time() )
+        x_cor = randint( start, end )
+        y_cor = randint( 0, 4 )  # creates cloud to top of board
+
+        for (i,row) in enumerate(config.cloud):
+            for (j,ele) in enumerate(row):
+                screen[y_cor+i][x_cor+j]=ele
+                
